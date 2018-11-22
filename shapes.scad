@@ -44,16 +44,19 @@ module filletProfile(r) {
  *   roundedSquare([20,30]);
  *
  * Rectangle with radius 2 on all corners:
- *   roundedSquare(v=[20,30, r=2];
+ *   roundedSquare(v=[20,30], r=2];
  *
  * Rectangle with different radii on every corner:
- *   roundedSquare(v=[20,30, r=[0,2,4,8]);
+ *   roundedSquare(v=[20,30], r=[0,2,4,8]);
  *
  * Same, centered:
- *   roundedSquare(v=[20,30, r=[0,2,4,8], center=true);
+ *   roundedSquare(v=[20,30], r=[0,2,4,8], center=true);
  *
  * Square with different radii on every corner:
  *   roundedSquare(v=20, r=[0,2,4,8]);
+ *
+ * Same, short call:
+ *   roundedSquare(20,[0,2,4,8]);
  *
  * Todo:
  *   Support negative radii for inset corners. Already supported by filletProfile()
