@@ -140,11 +140,11 @@ module cubeExtrude(size,center=false) {
 		rotate([90,0,270]) translate([0,0,-size.x])
 			linear_extrude(height=size.x) children();
 
-		// Left size
+		// Left side
 		rotate([90,0,180])
 			linear_extrude(height=size.y) children();
 
-		// Right size
+		// Right side
 		translate([size.x, size.y])
 			rotate([90,0,0])
 				linear_extrude(height=size.y) children();
