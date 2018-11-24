@@ -106,11 +106,13 @@ module roundedSquare(size,r=0,center=false) {
  *
  * Note: $fn should be divisible by 4 to ensure that the extruded corners line up with the extruded walls.
  *
+ * Note: It may be necessary to use render() to render cubeExtrude() correctly in preview mode
+ *
  * @param size Size of the virtual square/cube to wrap the object around. The z dimension is only used if center=true
  * @param center Bool. If true, the result is centered around origin
  *
  * Example:
- *   boxExtrude([60,50],$fn=fn4(r=5+30))
+ *   cubeExtrude([60,50],$fn=fn4(r=5+30))
  *     translate([5,0]) roundedSquare(30,[0,2,4,8]);
  *
  */
@@ -163,6 +165,66 @@ module cubeExtrude(size,center=false) {
 			for(m=[0,1]) mirror([0,0,m]) // Catch both +z and -z vertices
 				cube(pinf);
 		}
+	}
+}
+
+/***** Meassuring tools  *****/
+
+/**
+ * Shows the distance between two points in 2D or 3D space
+ *
+ * A meassuring rod is rendered between the two points, labelled with the distance between them. The distance is also echoed to the console.
+ *
+ * The tool is rendered using '%'. It is only rendered in previews, not in the final product.
+ *
+ * @param p1 First meassuring point [x,y] or [x,y,z]
+ * @param p2 Second meassuring point [x,y] or [x,y,z]
+ * @param label Optional label
+ * @param valign Vertical align of the label. "top" and "bottom" are good options. Default: "bottom"
+ * @param color Color of the caliper. Default: "white"
+ * @param alpha Alpha (opacity/transparency) of the caliper. Default: 1
+ */
+module caliper(p1,p2,label="",valign="bottom",color="white",alpha=1) {
+	// Ensure that all three dimensions are set
+	p1=[
+		p1.x!=undef?p1.x:0,
+		p1.y!=undef?p1.y:0,
+		p1.z!=undef?p1.z:0,
+	];
+	p2=[
+		p2.x!=undef?p2.x:0,
+		p2.y!=undef?p2.y:0,
+		p2.z!=undef?p2.z:0,
+	];
+	distance=norm(p1-p2);
+
+	distanceStr=str(label,distance);
+	echo(str("Caliper meassured: ",distanceStr));
+
+	// https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Transformations#Rotation_rule_help
+	inclination=acos(abs(p1.z-p2.z)/distance);
+	azimuth=atan2(abs(p1.y-p2.y),abs(p1.x-p2.x));
+
+	// Visual aid sizes
+	rodRadius=distance*0.005;
+	pointerRadius=distance*0.02;
+	pointerLength=distance*0.02;
+	fontSize=distance*0.1;
+	fontMargin=rodRadius;
+
+	%color(color,alpha=alpha) translate(p1) rotate([0,inclination,azimuth]) {
+		// Text
+		rotate([90,270,270])
+			translate([distance/2,(rodRadius+fontMargin)*(valign=="bottom"?1:valign=="top"?-1:0),0]) 
+				text(distanceStr,size=fontSize,valign=valign,halign="center");
+		// Meassuring rod
+		translate([0,0,pointerLength])
+			cylinder(r=rodRadius,h=distance-pointerLength*2);
+		// p1 pointer
+		cylinder(r1=0,r2=pointerRadius,h=pointerLength);
+		// p2 pointer
+		translate([0,0,distance-pointerLength])
+			cylinder(r2=0,r1=pointerRadius,h=pointerLength);
 	}
 }
 

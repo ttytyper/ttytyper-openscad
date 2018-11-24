@@ -2,6 +2,7 @@ use <shapes.scad>
 
 linear_extrude(height=2) translate([-30,-60])
 	filletProfile(r=20);
+caliper([-30,-60],[-10,-60],label="r=",valign="top",color="red",alpha=0.9);
 
 linear_extrude(height=2) translate([10,-60])
 	filletProfile(r=-20);
@@ -13,6 +14,7 @@ linear_extrude(height=2)
 // cubeExtrude()
 render() cubeExtrude([70,50,30],$fn=fn4(r=5+30))
 	translate([5,0]) roundedSquare(30,[0,2,4,8]);
+caliper([0,0],[70,50,30]);
 
 // arc()
 // Pacman, or a very inviting pie
