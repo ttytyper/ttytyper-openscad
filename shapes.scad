@@ -103,6 +103,65 @@ module roundedSquare(size,r=0,center=false) {
 	}
 }
 
+/***** 3D modules *****/
+
+/** Extrudes given object around a square/cube outline
+ *
+ * Note: $fn should be divisible by 4 to ensure that the extruded corners line up with the extruded walls.
+ *
+ * @param size Size of the virtual square/cube to wrap the object around. The z dimension is only used if center=true
+ * @param center Bool. If true, the result is centered around origin
+ *
+ * Example:
+ *   boxExtrude([60,50],$fn=fn4(r=5+30))
+ *     translate([5,0]) roundedSquare(30,[0,2,4,8]);
+ *
+ */
+module cubeExtrude(size,center=false) {
+	translate([center?-size.x/2:0, center?-size.y/2:0, center?-size.z/2:0]) {
+		// Lower left corner
+		rotate(180) corner() children();
+
+		// Upper left corner
+		translate([0,size.y])
+			rotate(90) corner() children();
+
+		// Lower right corner
+		translate([size.x,0])
+			rotate(270) corner() children();
+
+		// Upper right corner
+		translate([size.x,size.y])
+			corner() children();
+
+		// Upper side
+		translate([size.x, size.y])
+			rotate([90,0,90]) translate([0,0,-size.x])
+				linear_extrude(height=size.x) children();
+
+		// Lower side
+		rotate([90,0,270]) translate([0,0,-size.x])
+			linear_extrude(height=size.x) children();
+
+		// Left size
+		rotate([90,0,180])
+			linear_extrude(height=size.y) children();
+
+		// Right size
+		translate([size.x, size.y])
+			rotate([90,0,0])
+				linear_extrude(height=size.y) children();
+	}
+	module corner() {
+		intersection() {
+			rotate_extrude()
+				children();
+			for(m=[0,1]) mirror([0,0,m])
+				cube(pinf);
+		}
+	}
+}
+
 /***** Functions  *****/
 
 /** Calculate $fn based on $fs, $fa and radius
@@ -130,3 +189,5 @@ function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
 
 /***** Variables  *****/
 inf = 1e200 * 1e200;
+// Practical infinity. Apparently the largest number accepted by e.g. intersection() { cube(pinf); whatever(); }
+pinf = 1e12;
