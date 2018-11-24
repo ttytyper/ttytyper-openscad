@@ -44,16 +44,16 @@ module filletProfile(r) {
  *   roundedSquare([20,30]);
  *
  * Rectangle with radius 2 on all corners:
- *   roundedSquare(v=[20,30], r=2];
+ *   roundedSquare(size=[20,30], r=2];
  *
  * Rectangle with different radii on every corner:
- *   roundedSquare(v=[20,30], r=[0,2,4,8]);
+ *   roundedSquare(size=[20,30], r=[0,2,4,8]);
  *
  * Same, centered:
- *   roundedSquare(v=[20,30], r=[0,2,4,8], center=true);
+ *   roundedSquare(size=[20,30], r=[0,2,4,8], center=true);
  *
  * Square with different radii on every corner:
- *   roundedSquare(v=20, r=[0,2,4,8]);
+ *   roundedSquare(size=20, r=[0,2,4,8]);
  *
  * Same, short call:
  *   roundedSquare(20,[0,2,4,8]);
@@ -61,26 +61,26 @@ module filletProfile(r) {
  * Todo:
  *   Support negative radii for inset corners. Already supported by filletProfile()
  *
- * @param v Vector. Rectangle size [x,y]
+ * @param size Size of the rectange. Can be a single number or a vector [x,y]
  * @param r Number. Corner radius or radii (clockwise starting at lower left)
  * @param center Bool. Center the rectangle around origin. Default: false
  */
-module roundedSquare(v,r=0,center=false) {
+module roundedSquare(size,r=0,center=false) {
 	// If a single value was given, turn it into an array
 	r=(len(r)==undef?[r,r,r,r]:r);
-	v=(len(v)==undef?[v,v]:v);
+	s=(len(size)==undef?[size,size]:size);
 
 	points=[
 		// X,      Y
 		[r[0],     r[0]      ], 
-		[r[1],     v[1]-r[1] ], 
-		[v[0]-r[2],v[1]-r[2] ], 
-		[v[0]-r[3],r[3]      ], 
+		[r[1],     s[1]-r[1] ], 
+		[s[0]-r[2],s[1]-r[2] ], 
+		[s[0]-r[3],r[3]      ], 
 	];
 
 	translate([
-		center?-v[0]/2:0,
-		center?-v[1]/2:0
+		center?-s[0]/2:0,
+		center?-s[1]/2:0
 	])
 	hull() {
 		// All the hard corners
@@ -95,8 +95,8 @@ module roundedSquare(v,r=0,center=false) {
 			[270, points[3], r[3] ]  // Lower right
 		]) {
 			translate(corner[1]) {
-				if(corner[2]*2 > min(v[0],v[1]))
-					echo("<font color=red>roundedSquare: Corner diameter ", corner[2]*2, " is larger than the smallest width or height of the rectangle ",min(v[0],v[1]), ". This will probably give undesired results</font>");
+				if(corner[2]*2 > min(s[0],s[1]))
+					echo("<font color=red>roundedSquare: Corner diameter ", corner[2]*2, " is larger than the smallest width or height of the rectangle ",min(s[0],s[1]), ". This will probably give undesired results</font>");
 				rotate(corner[0]) filletProfile(r=corner[2],$fn=corner[2]);
 			}
 		}
