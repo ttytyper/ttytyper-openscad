@@ -187,6 +187,33 @@ function fn4(r) = fndivby(r,4);
 function outerFudge(r) = r * (1/cos(180/($fn>0?$fn:fn(r))));
 function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
 
+/**
+ * Returns the vector [x,y] of a point along an imagined arc
+ *
+ * There are $fn vectors distributed evenly along the length of the arc. This
+ * function returns any one of them by their index number.
+ *
+ * @param r  Radius of the arc
+ * @param a1 Start angle of the arc (default 0)
+ * @param a2 End angle of the arc (default 360)
+ * @param i  Index of the vector (default 0)
+ */
+function arcPoint(r,a1=0,a2=360,i=0) =
+	let($fn=($fn>0?$fn:fn(r)))
+	let(deg=(a2-a1)/$fn*i)
+	[r*sin(deg+a1), r*cos(deg+a1)];
+
+/**
+ * Returns a series of vectors forming an arc
+ *
+ * @param r Radius of the arc
+ * @param a1 Start angle of the arc
+ * @param a2 End angle of the arc
+ */
+function arc(r,a1,a2,_i=0,_v=[]) =
+	let($fn=($fn>0?$fn:fn(r)))
+	(_i>$fn?_v:concat(arc(r,a1,a2,_i+1,_v),[arcPoint(r=r,a1=a1,a2=a2,i=_i,$fn=$fn)]));
+
 /***** Variables  *****/
 inf = 1e200 * 1e200;
 // Practical infinity. Apparently the largest number accepted by e.g. intersection() { cube(pinf); whatever(); }
