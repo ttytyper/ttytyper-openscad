@@ -127,3 +127,6 @@ function fn4(r) = fndivby(r,4);
  */
 function outerFudge(r) = r * (1/cos(180/($fn>0?$fn:fn(r))));
 function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
+
+/***** Variables  *****/
+inf = 1e200 * 1e200;
