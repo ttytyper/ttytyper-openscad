@@ -9,19 +9,21 @@
 module filletProfile(r) {
 	ar=abs(r);
 
+	// Concave
 	if(r<0) {
 		translate([ar,ar])
 			polygon(concat([[-ar,-ar]],
 				arc(r=ar,a1=180,a2=270),
 				[[-ar,-ar]]));
 	}
+	// Convex
 	else if(r>0) {
 		polygon(concat([[0,0]],
 			arc(r=ar,a1=0,a2=90),
 			[[0,0]]));
 	}
+	// Intentionally left blank, as r=0 should result in nothing
 	else {
-		// Intentionally left blank, as r=0 should result in nothing
 	}
 }
 
@@ -56,7 +58,7 @@ module filletProfile(r) {
  * Todo:
  *   Support negative radii for inset corners. Already supported by filletProfile()
  *
- * @param size Size of the rectange. Can be a single number or a vector [x,y]
+ * @param size Size of the rectangle. Can be a single number or a vector [x,y]
  * @param r Number. Corner radius or radii (clockwise starting at lower left)
  * @param center Bool. Center the rectangle around origin. Default: false
  */
@@ -192,7 +194,7 @@ function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
 /**
  * Returns the vector [x,y] of a point along an imagined arc
  *
- * There are $fn vectors distributed evenly along the length of the arc. This
+ * There are $fn+1 vectors distributed evenly along the length of the arc. This
  * function returns any one of them by their index number.
  *
  * @param r  Radius of the arc
