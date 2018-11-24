@@ -1,5 +1,11 @@
 use <shapes.scad>
 
+linear_extrude(height=2) translate([-30,-60])
+	filletProfile(r=20);
+
+linear_extrude(height=2) translate([10,-60])
+	filletProfile(r=-20);
+
 // roundedSquare()
 linear_extrude(height=2)
 	translate([5,0]) roundedSquare(30,[0,2,4,8]);

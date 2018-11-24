@@ -7,20 +7,18 @@
  * Negative r gives concave fillets, suitable for inner corners
  */
 module filletProfile(r) {
-	$fn=fn4(abs(r));
 	ar=abs(r);
 
 	if(r<0) {
-		translate([ar,ar]) mirror([1,1]) difference() {
-			square(ar);
-			circle(r=ar);
-		}
+		translate([ar,ar])
+			polygon(concat([[-ar,-ar]],
+				arc(r=ar,a1=180,a2=270),
+				[[-ar,-ar]]));
 	}
 	else if(r>0) {
-		intersection() {
-			square(ar);
-			circle(ar);
-		}
+		polygon(concat([[0,0]],
+			arc(r=ar,a1=0,a2=90),
+			[[0,0]]));
 	}
 	else {
 		// Intentionally left blank, as r=0 should result in nothing
@@ -34,9 +32,6 @@ module filletProfile(r) {
  *
  * The radius of all four corners can be controlled collectively or
  * individually.
- *
- * Note: This module overrides $fn to line up the rounded corners perfectly.
- * Use $fa and $fs to control the level of detail.
  *
  * Examples:
  *
@@ -97,7 +92,7 @@ module roundedSquare(size,r=0,center=false) {
 			translate(corner[1]) {
 				if(corner[2]*2 > min(s[0],s[1]))
 					echo("<font color=red>roundedSquare: Corner diameter ", corner[2]*2, " is larger than the smallest width or height of the rectangle ",min(s[0],s[1]), ". This will probably give undesired results</font>");
-				rotate(corner[0]) filletProfile(r=corner[2],$fn=corner[2]);
+				rotate(corner[0]) filletProfile(r=corner[2]);
 			}
 		}
 	}
@@ -152,11 +147,18 @@ module cubeExtrude(size,center=false) {
 			rotate([90,0,0])
 				linear_extrude(height=size.y) children();
 	}
+
 	module corner() {
+		// rotate_extrude(angle=90) would be a nice touch and might let us
+		// forget about handling $fn. But unfortunately it has only been
+		// available since 2016.XX, which is too modern for Debian Stretch
+		// (stable at the point of writing this). So instead we muck around
+		// with intersecting the full rotation with an infinitely-ish large
+		// cube.
 		intersection() {
 			rotate_extrude()
 				children();
-			for(m=[0,1]) mirror([0,0,m])
+			for(m=[0,1]) mirror([0,0,m]) // Catch both +z and -z vertices
 				cube(pinf);
 		}
 	}
@@ -200,8 +202,8 @@ function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
  */
 function arcPoint(r,a1=0,a2=360,i=0) =
 	let($fn=($fn>0?$fn:fn(r)))
-	let(deg=(a2-a1)/$fn*i)
-	[r*sin(deg+a1), r*cos(deg+a1)];
+	let(deg=(a2-a1)/$fn*i+a1)
+	[r*sin(deg), r*cos(deg)];
 
 /**
  * Returns a series of vectors forming an arc
