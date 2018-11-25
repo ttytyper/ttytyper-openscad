@@ -1,4 +1,4 @@
-use <shapes.scad>
+use <ttytyper-openscad.scad>
 
 linear_extrude(height=2) translate([-30,-60])
 	filletProfile(r=20);
