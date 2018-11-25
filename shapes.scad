@@ -235,7 +235,7 @@ module caliper(p1,p2,label="",valign="bottom",color="white",alpha=1) {
  * Ported from:
  * https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language (get_fragments_from_r)
  */
-function fn(r) = ceil(max(min(360.0 / $fa, r*2*PI / $fs), 5));
+function fn(r,a=360) = ceil(max(min(360.0 / $fa, r*2*PI / $fs), 5)*(a/360));
 
 /** Force $fn to be divisible by n
  *
@@ -265,7 +265,7 @@ function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
  * @param i  Index of the vector (default 0)
  */
 function arcPoint(r,a1=0,a2=360,i=0) =
-	let($fn=($fn>0?$fn:fn(r)))
+	let($fn=($fn>0?$fn:fn(r,abs(a1-a2))))
 	let(deg=(a2-a1)/$fn*i+a1)
 	[r*sin(deg), r*cos(deg)];
 
@@ -277,7 +277,7 @@ function arcPoint(r,a1=0,a2=360,i=0) =
  * @param a2 End angle of the arc
  */
 function arc(r,a1,a2,_i=0,_v=[]) =
-	let($fn=($fn>0?$fn:fn(r)))
+	let($fn=($fn>0?$fn:fn(r,abs(a1-a2))))
 	(_i>$fn?_v:concat(arc(r,a1,a2,_i+1,_v),[arcPoint(r=r,a1=a1,a2=a2,i=_i,$fn=$fn)]));
 
 /***** Variables  *****/
