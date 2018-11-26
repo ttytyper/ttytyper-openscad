@@ -189,11 +189,6 @@ module roundedCylinder(r,h,f=0,f1,f2,center=false) {
 	// Top center
 	c2=[r-f2,h-f2];
 
-	echo(f1);
-	echo(f2);
-	echo(c1);
-	echo(c2);
-
 	translate([0,0,center?-h/2:0])
 	rotate_extrude()
 	polygon(
