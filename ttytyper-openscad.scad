@@ -168,6 +168,45 @@ module cubeExtrude(size,center=false) {
 	}
 }
 
+/**
+ * Cylinder with rounded end caps
+ *
+ * @param r  Radius of the cylinder
+ * @param h  Height of the cylinder
+ * @param f  Fillet radius of both ends
+ * @param f1 Bottom fillet radius only
+ * @param f2 Top fillet radius only
+ * @param center Boolean. Center cylinder around origin. Default: false
+ *
+ * TODO: Support different radii for top and bottom, just like cylinder(r1=foo, r2=bar, h=baz);
+ */
+module roundedCylinder(r,h,f=0,f1,f2,center=false) {
+	f1=(f1!=undef?f1:f);
+	f2=(f2!=undef?f2:f);
+
+	// Bottom center
+	c1=[r-f1,f1];
+	// Top center
+	c2=[r-f2,h-f2];
+
+	echo(f1);
+	echo(f2);
+	echo(c1);
+	echo(c2);
+
+	translate([0,0,center?-h/2:0])
+	rotate_extrude()
+	polygon(
+		concat(
+			[[0,0]],
+			[[0,h]],
+			arc(r=f2,a2=0,a1=90,tr=c2),
+			arc(r=f1,a2=90,a1=180,tr=c1),
+			[[0,0]]
+		)
+	);
+}
+
 /***** Meassuring tools  *****/
 
 /**
@@ -263,11 +302,12 @@ function midFudge(r) = r * (1+1/cos(180/($fn>0?$fn:fn(r)))/2);
  * @param a1 Start angle of the arc (default 0)
  * @param a2 End angle of the arc (default 360)
  * @param i  Index of the vector (default 0)
+ * @param tr Translate (move) by [x,y]
  */
-function arcPoint(r,a1=0,a2=360,i=0) =
+function arcPoint(r,a1=0,a2=360,i=0,tr=[0,0]) =
 	let($fn=($fn>0?$fn:fn(r,abs(a1-a2))))
 	let(deg=(a2-a1)/$fn*i+a1)
-	[r*sin(deg), r*cos(deg)];
+	[r*sin(deg), r*cos(deg)]+tr;
 
 /**
  * Returns a series of vectors forming an arc
@@ -275,10 +315,11 @@ function arcPoint(r,a1=0,a2=360,i=0) =
  * @param r Radius of the arc
  * @param a1 Start angle of the arc
  * @param a2 End angle of the arc
+ * @param tr Translate (move) by [x,y]
  */
-function arc(r,a1,a2,_i=0,_v=[]) =
+function arc(r,a1,a2,tr=[0,0],_i=0,_v=[]) =
 	let($fn=($fn>0?$fn:fn(r,abs(a1-a2))))
-	(_i>$fn?_v:concat(arc(r,a1,a2,_i+1,_v),[arcPoint(r=r,a1=a1,a2=a2,i=_i,$fn=$fn)]));
+	(_i>$fn?_v:concat(arc(r,a1,a2,tr,_i+1,_v),[arcPoint(r=r,a1=a1,a2=a2,i=_i,tr=tr,$fn=$fn)]));
 
 /***** Variables  *****/
 inf = 1e200 * 1e200;
