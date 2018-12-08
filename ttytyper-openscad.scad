@@ -109,14 +109,16 @@ module roundedSquare(size,r=0,center=false) {
  * Note: It may be necessary to use render() to render cubeExtrude() correctly in preview mode
  *
  * @param size Size of the virtual square/cube to wrap the object around. The z dimension is only used if center=true
+ * @param fill Fill the cube. Default: False
  * @param center Bool. If true, the result is centered around origin
+ * @param e Enlarge certain dimensions by this much to help create a valid 2-manifold object
  *
  * Example:
  *   cubeExtrude([60,50],$fn=fn4(r=5+30))
  *     translate([5,0]) roundedSquare(30,[0,2,4,8]);
  *
  */
-module cubeExtrude(size,center=false) {
+module cubeExtrude(size,fill=false,center=false,e=0.0001) {
 	translate([center?-size.x/2:0, center?-size.y/2:0, center?-size.z/2:0]) {
 		// Lower left corner
 		rotate(180) corner() children();
@@ -134,22 +136,28 @@ module cubeExtrude(size,center=false) {
 			corner() children();
 
 		// Upper side
-		translate([size.x, size.y])
+		translate([size.x-e, size.y])
 			rotate([90,0,90]) translate([0,0,-size.x])
-				linear_extrude(height=size.x) children();
+				linear_extrude(height=size.x+e*2) children();
 
 		// Lower side
-		rotate([90,0,270]) translate([0,0,-size.x])
-			linear_extrude(height=size.x) children();
+		translate([e,0])
+			rotate([90,0,270]) translate([0,0,-size.x])
+				linear_extrude(height=size.x+e*2) children();
 
 		// Left side
-		rotate([90,0,180])
-			linear_extrude(height=size.y) children();
+		translate([0, -e])
+			rotate([90,0,180])
+				linear_extrude(height=size.y+e*2) children();
 
 		// Right side
-		translate([size.x, size.y])
+		translate([size.x, size.y+e])
 			rotate([90,0,0])
-				linear_extrude(height=size.y) children();
+				linear_extrude(height=size.y+e*2) children();
+		if(fill==true) {
+			translate([-e,-e])
+				cube(size+[e,e,0]*2);
+		}
 	}
 
 	module corner() {
