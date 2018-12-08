@@ -179,23 +179,25 @@ module cubeExtrude(size,fill=false,center=false,e=0.0001) {
 /**
  * Cylinder with rounded end caps
  *
- * @param r  Radius of the cylinder
+ * @param r  Radius
+ * @param r1 Radius of only the bottom
+ * @param r2 Radius of only the top
  * @param h  Height of the cylinder
  * @param f  Fillet radius of both ends
  * @param f1 Bottom fillet radius only
  * @param f2 Top fillet radius only
  * @param center Boolean. Center cylinder around origin. Default: false
- *
- * TODO: Support different radii for top and bottom, just like cylinder(r1=foo, r2=bar, h=baz);
  */
-module roundedCylinder(r,h,f=0,f1,f2,center=false) {
-	f1=(f1!=undef?f1:f);
-	f2=(f2!=undef?f2:f);
+module roundedCylinder(r=0,h,r1,r2,f=0,f1,f2,center=false) {
+	r1=(r1!=undef?r1:r); // Bottom radius
+	r2=(r2!=undef?r2:r); // Top radius
+	f1=(f1!=undef?f1:f); // Bottom fillet
+	f2=(f2!=undef?f2:f); // Top fillet
 
-	// Bottom center
-	c1=[r-f1,f1];
-	// Top center
-	c2=[r-f2,h-f2];
+	f1c=[r1-f1,f1];      // Bottom fillet center
+	f2c=[r2-f2,h-f2];    // Top fillet center
+
+	angle=commonExternalTangentAngle(f1,f2,f1c,f2c);
 
 	translate([0,0,center?-h/2:0])
 	rotate_extrude()
@@ -203,8 +205,8 @@ module roundedCylinder(r,h,f=0,f1,f2,center=false) {
 		concat(
 			[[0,0]],
 			[[0,h]],
-			arc(r=f2,a2=0,a1=90,tr=c2),
-			arc(r=f1,a2=90,a1=180,tr=c1),
+			arc(r=f2,a2=0,a1=-angle,tr=f2c),
+			arc(r=f1,a2=-angle,a1=180,tr=f1c),
 			[[0,0]]
 		)
 	);
@@ -323,6 +325,30 @@ function arcPoint(r,a1=0,a2=360,i=0,tr=[0,0]) =
 function arc(r,a1,a2,tr=[0,0],_i=0,_v=[]) =
 	let($fn=($fn>0?$fn:fn(r,abs(a1-a2))))
 	(_i>$fn?_v:concat(arc(r,a1,a2,tr,_i+1,_v),[arcPoint(r=r,a1=a1,a2=a2,i=_i,tr=tr,$fn=$fn)]));
+
+/**
+ * Finds the angle of one common external tangent to two circles of given radii and coordinates
+ *
+ * FIXME: Verify that this works correctly in all cases. Works for the few use cases it was made for, but I don't trust my trig abilities
+ *
+ * @param r1 Radius of circle 1
+ * @param r2 Radius of circle 2
+ * @param v1 Center coordinate of circle 1
+ * @param v2 Center coordinate of circle 2
+ * @returns Angle
+ *
+ * https://en.wikipedia.org/wiki/Tangent_lines_to_circles#/media/File:Aeussere_tangente_computation.svg
+ */
+function commonExternalTangentAngle(r1,r2,v1=[0,0],v2=[0,0]) =
+	let(v1=[v1.x,v1.y])                       // Strip Z component
+	let(v2=[v2.x,v2.y])                       // Strip Z component
+	let(hyp=norm(v1-v2))                      // Length of hypothenusis
+	let(cat=abs(r1-r2))                       // Length of one of the catheti
+	let(catAngle=asin(cat/hyp))               // Cathetus angle before adjustment
+	let(vAngle=atan((v2.y-v1.y)/(v2.x-v1.x))) // Angle between circle centers
+	let(angle=-(catAngle-vAngle))             // Get the real angle
+	let(angle=angle>0?angle-180:angle)        // This seems to work... But I'm sure it's not correct
+	angle;
 
 /***** Variables  *****/
 inf = 1e200 * 1e200;

@@ -25,6 +25,6 @@ linear_extrude(height=2) translate([-80,0])
 linear_extrude(height=2) translate([-80,65])
 	polygon(concat([[0,0]],arc(30,a1=(90-10)+10*sin($t*360),a2=-270+25-25*sin($t*360)),[[0,0]]));
 
-// Rounded cylinder
-translate([-100,-100])
-	roundedCylinder(r=30,h=30,f=2,$fa=0.5);
+// Rounded cylinder, bullet
+translate([-70,-70])
+	roundedCylinder(r1=20,r2=20,h=50,f1=5,f2=20);
